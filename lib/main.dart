@@ -29,8 +29,9 @@ class MessageHandler extends StatefulWidget {
 class _MessageHandlerState extends State<MessageHandler> {
   final Firestore _db = Firestore.instance;
   final FirebaseMessaging _fcm = FirebaseMessaging();
-
   StreamSubscription iosSubscription;
+  final String name = "";
+  final TextEditingController _controller = new TextEditingController();
 
   @override
   void initState() {
@@ -38,41 +39,33 @@ class _MessageHandlerState extends State<MessageHandler> {
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         print(data);
-        _saveDeviceToken();
+//        _saveDeviceToken();
+        ///歡迎登入
       });
-
       _fcm.requestNotificationPermissions(IosNotificationSettings());
     } else {
-      _saveDeviceToken();
-    }
+//      _saveDeviceToken();
+      ///歡迎登入
 
+    }
     _fcm.configure(
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");
-        // final snackbar = SnackBar(
-        //   content: Text(message['notification']['title']),
-        //   action: SnackBarAction(
-        //     label: 'Go',
-        //     onPressed: () => null,
-        //   ),
-        // );
-
-        // Scaffold.of(context).showSnackBar(snackbar);
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-                content: ListTile(
-                  title: Text(message['notification']['title']),
-                  subtitle: Text(message['notification']['body']),
-                ),
-                actions: <Widget>[
-                  FlatButton(
-                    color: Colors.amber,
-                    child: Text('Ok'),
-                    onPressed: () => Navigator.of(context).pop(),
-                  ),
-                ],
+            content: ListTile(
+              title: Text(message['notification']['title']),
+              subtitle: Text(message['notification']['body']),
+            ),
+            actions: <Widget>[
+              FlatButton(
+                color: Colors.amber,
+                child: Text('Ok'),
+                onPressed: () => Navigator.of(context).pop(),
               ),
+            ],
+          ),
         );
       },
       onLaunch: (Map<String, dynamic> message) async {
@@ -97,31 +90,57 @@ class _MessageHandlerState extends State<MessageHandler> {
     // _handleMessages(context);
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.deepOrange,
-        title: Text('FCM Push Notifications'),
-      ),
+          backgroundColor: Colors.deepOrange,
+          title: Text('FCM Push Notifications')),
+      body: new Center(
+          child: new Column(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+            Text('FCM by GDG 1024'),
+            new TextField(
+              controller: _controller,
+              decoration: new InputDecoration(
+                border: OutlineInputBorder(),
+                hintText: '請問如何稱呼？',
+              ),
+            ),
+            new RaisedButton(
+              onPressed: () {
+                _saveToken();
+                showDialog(
+                  context: context,
+                  child: new AlertDialog(
+                    title: new Text('What you typed'),
+                    content: new Text(_controller.text),
+                  ),
+                );
+              },
+              child: new Text('DONE'),
+            ),
+            new Image.network(
+              'https://cdn.jsdelivr.net/gh/flutterchina/website@1.0/images/flutter-mark-square-100.png',
+            ),
+          ])),
     );
   }
 
   /// Get the token, save it to the database for current user
-  _saveDeviceToken() async {
+  ///main.dart _saveDeviceToken()修改為以下
+  _saveToken() async {
     // Get the current user
-    String uid = 'jeffd23';
+//    String uid = 'jeffd23';
+    String uid = _controller.text;
     // FirebaseUser user = await _auth.currentUser();
-
     // Get the token for this device
     String fcmToken = await _fcm.getToken();
 
     // Save it to Firestore
     if (fcmToken != null) {
-      var tokens = _db
-          .collection('users')
-          .document(uid)
-          .collection('tokens')
-          .document(fcmToken);
-
+      var tokens = _db.collection('tokens').document(fcmToken);
       await tokens.setData({
         'token': fcmToken,
+        'uid': uid,
         'createdAt': FieldValue.serverTimestamp(), // optional
         'platform': Platform.operatingSystem // optional
       });
