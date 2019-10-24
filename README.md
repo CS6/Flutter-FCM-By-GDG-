@@ -18,3 +18,4 @@ Follow the [official FlutterFire setup guide](https://firebase.google.com/docs/f
 ```
 flutter run
 ```
+
