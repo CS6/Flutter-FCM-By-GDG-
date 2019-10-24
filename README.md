@@ -17,5 +17,10 @@ Follow the [official FlutterFire setup guide](https://firebase.google.com/docs/f
 
 ```
 flutter run
+
+flutter pub get
+
+flutter pub upgrade
+
 ```
 
