@@ -16,6 +16,7 @@ dependencies:
 
   firebase_auth: ^0.11.1+6
   firebase_messaging: ^5.0.2
+  firebase_remote_config: ^0.2.0+7
   # google_sign_in: ^4.0.1+1
 
   # rxdart: ^0.21.0
