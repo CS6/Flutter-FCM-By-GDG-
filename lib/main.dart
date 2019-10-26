@@ -5,7 +5,9 @@ import 'package:flutter/material.dart';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+
 // import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 
 void main() => runApp(MyApp());
 
@@ -33,9 +35,25 @@ class _MessageHandlerState extends State<MessageHandler> {
   final String name = "";
   final TextEditingController _controller = new TextEditingController();
 
+  getRemoteConfig() async {
+    final RemoteConfig remoteConfig = await RemoteConfig.instance;
+    await remoteConfig.fetch(expiration: const Duration(hours: 5));
+    await remoteConfig.activateFetched();
+    final versionNo = remoteConfig.getInt("version_no");
+    final versionName = remoteConfig.getString("version_name");
+
+    print("\n\n");
+    print("~~~~~~~~~~");
+    print("Version No: $versionNo ");
+    print("Version Name: $versionName");
+    print("~~~~~~~~~~");
+    print("\n\n");
+  }
+
   @override
   void initState() {
     super.initState();
+    getRemoteConfig();
     if (Platform.isIOS) {
       iosSubscription = _fcm.onIosSettingsRegistered.listen((data) {
         print(data);
